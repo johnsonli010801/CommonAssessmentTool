@@ -24,8 +24,17 @@ jobs:
           python -m pip install --upgrade pip  # Upgrade pip to the latest version
           pip install setuptools wheel
           pip install -r requirements.txt  # Install dependencies from requirements.txt
+          pip install -r requirements-dev.txt
           pip install pylint pytest
+      
+      - name: Run Flake8
+        run: flake8 .
 
+      - name: Run Black
+        run: black . --check
+
+      - name: Run MyPy
+        run: mypy .
       - name: Run Tests
         run: |
           python -m pytest tests/

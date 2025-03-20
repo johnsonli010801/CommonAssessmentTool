@@ -14,7 +14,15 @@ Install development tools with:
 
 ## Running Analysis
 Run these commands to analyze code quality:
-1. `pylint app/ > pylint_report.txt`
 2. `flake8 app/ > flake8_report.txt`
 3. `black --check --diff app/ > black_report.txt`
 4. `mypy app/ > mypy_report.txt`
+
+## Installation of Dependency on Main Code:
+`pip install -r ./app/requirements.txt`
+
+## To check the code using pre-commit:
+```
+pre-commit autoupdate
+pre-commit run --all-files
+```
