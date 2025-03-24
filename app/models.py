@@ -17,15 +17,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship
 
 from app.database import Base
-
-
-class UserRole(str, enum.Enum):
-    """
-    User Role class store two roles
-    """
-
-    admin = "admin"
-    case_worker = "case_worker"
+from app.enums import UserRole  # New import
 
 
 class User(Base):
