@@ -10,12 +10,13 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Local application/library specific imports
 from app import models
-from app.database import engine
+from app.database import engine,Base #Add Base here
 from app.clients.router import router as clients_router
 from app.auth.router import router as auth_router
 
+from app.database import Base
 # Initialize database tables
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 # Create FastAPI application
 app = FastAPI(

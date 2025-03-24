@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session
 from passlib.context import CryptContext
 
 from app.database import get_db
-from app.models import User, UserRole
+from app.models import User
+from app.enums import UserRole
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 

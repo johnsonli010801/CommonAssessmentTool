@@ -66,3 +66,12 @@ def success_rate_constraint():
         f"success_rate >= {MIN_SUCCESS_RATE} AND "
         f"success_rate <= {MAX_SUCCESS_RATE}"
     )
+
+def username_length_constraint():
+    """Create a constraint to ensure username has a minimum length."""
+    MIN_USERNAME_LENGTH = 3
+    return CheckConstraint(f"LENGTH(username) >= {MIN_USERNAME_LENGTH}")
+
+def email_format_constraint():
+    """Create a constraint to ensure email contains @ symbol."""
+    return CheckConstraint("email LIKE '%@%'")
