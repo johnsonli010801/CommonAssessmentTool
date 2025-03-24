@@ -10,7 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 # Local application/library specific imports
 from app import models
+import app.ml  # This will execute the initialization code
 from app.database import engine,Base #Add Base here
+from app.ml.router import router as models_router # newly added
 from app.clients.router import router as clients_router
 from app.auth.router import router as auth_router
 
@@ -26,6 +28,7 @@ app = FastAPI(
 )
 
 # Include routers
+app.include_router(models_router)
 app.include_router(auth_router)
 app.include_router(clients_router)
 

@@ -71,3 +71,60 @@ To test the machine learning model implementation and model switching capability
 - Switch between models
 - Train each model with sample data
 - Make predictions with each model
+
+## Story 2 Implementation: Multiple ML Model Support
+
+### Completed Features:
+- Implemented a flexible ML model architecture with model switching capability
+- Created a base model interface that all model types implement
+- Developed three different model implementations:
+  - Random Forest (default model)
+  - Gradient Boosting
+  - Linear Regression
+- Created a model registry to manage different model types and switching
+- Implemented API endpoints for model management
+
+### API Endpoints for Model Management
+
+The following endpoints are now available for interacting with ML models:
+
+1. **Get Current Model**
+   - Endpoint: `GET /models/current`
+   - Description: Returns the name of the currently active model
+   - Response example: `{"name": "RandomForest"}`
+   - Test command: `curl -X GET "http://127.0.0.1:8000/models/current"`
+
+2. **List Available Models**
+   - Endpoint: `GET /models/available`
+   - Description: Returns all available models and indicates the current model
+   - Response example: `{"models": ["RandomForest", "GradientBoosting", "LinearRegression"], "current_model": "RandomForest"}`
+   - Test command: `curl -X GET "http://127.0.0.1:8000/models/available"`
+
+3. **Switch Model**
+   - Endpoint: `POST /models/switch/{model_name}`
+   - Description: Changes the active model to the specified model
+   - Response example: `{"name": "GradientBoosting"}`
+   - Test command: `curl -X POST "http://127.0.0.1:8000/models/switch/GradientBoosting"`
+
+### Testing the Model Switching Functionality
+
+You can test the model switching functionality in two ways:
+
+#### 1. Using the Swagger UI:
+- Start the application: `uvicorn app.main:app --reload`
+- Navigate to: `http://127.0.0.1:8000/docs`
+- Scroll to the "models" section
+- Try each endpoint by clicking "Try it out" and "Execute"
+
+#### 2. Using the ML Test Script:
+- Run: `python -m app.ml.test_models`
+- This will test model registration, switching, and prediction capability
+
+### Implementation Details
+
+- **Model Registry Pattern**: Used a singleton registry to manage models
+- **Strategy Pattern**: Each model implementation follows the same interface
+- **Dependency Injection**: High-level components use abstractions rather than concrete implementations
+- **Open for Extension**: New models can be added without modifying existing code
+
+This implementation satisfies all requirements for Story 2 while following SOLID principles.
