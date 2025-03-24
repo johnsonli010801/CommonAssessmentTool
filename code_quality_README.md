@@ -30,7 +30,7 @@ pre-commit run --all-files
 ## Refactoring for SOLID Principles
 
 ### Completed Refactorings:
-- Extracted UserRole enum to a separate file (Single Responsibility Principle)
+- Extracted UserRole enum to a separate file (app/enums.py) (Single Responsibility Principle)
 - Extracted validation logic from models (Single Responsibility Principle)
   - Created app/validators.py with dedicated validation functions
   - Defined constants for validation boundaries
