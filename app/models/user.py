@@ -11,6 +11,7 @@ from app.database import Base
 from app.enums import UserRole
 from app.validators import username_length_constraint, email_format_constraint
 
+
 class User(Base):
     """
     Represents a User in the database.
@@ -26,7 +27,7 @@ class User(Base):
     role = Column(Enum(UserRole), nullable=False)
 
     cases = relationship("ClientCase", back_populates="user")
-    
+
     # Apply User-specific constraints
     __table_args__ = (
         username_length_constraint(),

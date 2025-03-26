@@ -1,4 +1,4 @@
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional
 from app.models import Client, ClientCase, User
@@ -21,7 +21,7 @@ class ClientQueryService:
             raise HTTPException(status_code=400, detail="Invalid pagination parameters")
         return {
             "clients": db.query(Client).offset(skip).limit(limit).all(),
-            "total": db.query(Client).count()
+            "total": db.query(Client).count(),
         }
 
     # Retrieve clients that match various optional criteria filters
@@ -85,7 +85,9 @@ class ClientQueryService:
         try:
             return query.all()
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error retrieving clients: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Error retrieving clients: {str(e)}"
+            )
 
     # Filter clients based on service-related fields
     @staticmethod
@@ -97,37 +99,59 @@ class ClientQueryService:
         try:
             return query.all()
         except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error retrieving clients: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Error retrieving clients: {str(e)}"
+            )
 
     # Get all services associated with a given client
     @staticmethod
     def get_client_services(db: Session, client_id: int):
         services = db.query(ClientCase).filter(ClientCase.client_id == client_id).all()
         if not services:
-            raise HTTPException(status_code=404, detail=f"No services found for client {client_id}")
+            raise HTTPException(
+                status_code=404, detail=f"No services found for client {client_id}"
+            )
         return services
 
     # Get clients with a minimum success rate
     @staticmethod
     def get_clients_by_success_rate(db: Session, min_rate: int = 70):
         if not (0 <= min_rate <= 100):
-            raise HTTPException(status_code=400, detail="Success rate must be between 0 and 100")
-        return db.query(Client).join(ClientCase).filter(ClientCase.success_rate >= min_rate).all()
+            raise HTTPException(
+                status_code=400, detail="Success rate must be between 0 and 100"
+            )
+        return (
+            db.query(Client)
+            .join(ClientCase)
+            .filter(ClientCase.success_rate >= min_rate)
+            .all()
+        )
 
     # Get all clients assigned to a specific case worker
     @staticmethod
     def get_clients_by_case_worker(db: Session, case_worker_id: int):
         if not db.query(User).filter(User.id == case_worker_id).first():
-            raise HTTPException(status_code=404, detail=f"Case worker {case_worker_id} not found")
-        return db.query(Client).join(ClientCase).filter(ClientCase.user_id == case_worker_id).all()
+            raise HTTPException(
+                status_code=404, detail=f"Case worker {case_worker_id} not found"
+            )
+        return (
+            db.query(Client)
+            .join(ClientCase)
+            .filter(ClientCase.user_id == case_worker_id)
+            .all()
+        )
 
     # Internal helper method to apply dynamic filtering logic
     @staticmethod
     def _apply_criteria_filters(query, **filters):
-        if filters.get("education_level") and not (1 <= filters["education_level"] <= 14):
+        if filters.get("education_level") and not (
+            1 <= filters["education_level"] <= 14
+        ):
             raise HTTPException(status_code=400, detail="Invalid education level")
         if filters.get("age_min") and filters["age_min"] < 18:
-            raise HTTPException(status_code=400, detail="Minimum age must be at least 18")
+            raise HTTPException(
+                status_code=400, detail="Minimum age must be at least 18"
+            )
         if filters.get("gender") and filters["gender"] not in [1, 2]:
             raise HTTPException(status_code=400, detail="Gender must be 1 or 2")
 
@@ -152,14 +176,25 @@ class ClientMutationService:
             return client
         except Exception as e:
             db.rollback()
-            raise HTTPException(status_code=500, detail=f"Failed to update client: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Failed to update client: {str(e)}"
+            )
 
     # Update service info for a specific client-case worker relationship
     @staticmethod
-    def update_client_services(db: Session, client_id: int, user_id: int, update_data: ServiceUpdate):
-        case = db.query(ClientCase).filter(ClientCase.client_id == client_id, ClientCase.user_id == user_id).first()
+    def update_client_services(
+        db: Session, client_id: int, user_id: int, update_data: ServiceUpdate
+    ):
+        case = (
+            db.query(ClientCase)
+            .filter(ClientCase.client_id == client_id, ClientCase.user_id == user_id)
+            .first()
+        )
         if not case:
-            raise HTTPException(status_code=404, detail=f"No case found for client {client_id} and worker {user_id}")
+            raise HTTPException(
+                status_code=404,
+                detail=f"No case found for client {client_id} and worker {user_id}",
+            )
         for field, value in update_data.dict(exclude_unset=True).items():
             setattr(case, field, value)
         try:
@@ -168,7 +203,9 @@ class ClientMutationService:
             return case
         except Exception as e:
             db.rollback()
-            raise HTTPException(status_code=500, detail=f"Failed to update client services: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Failed to update client services: {str(e)}"
+            )
 
     # Assign a new case worker to a client, with default service values
     @staticmethod
@@ -176,8 +213,14 @@ class ClientMutationService:
         if not db.query(Client).filter(Client.id == client_id).first():
             raise HTTPException(status_code=404, detail=f"Client {client_id} not found")
         if not db.query(User).filter(User.id == worker_id).first():
-            raise HTTPException(status_code=404, detail=f"Case worker {worker_id} not found")
-        if db.query(ClientCase).filter(ClientCase.client_id == client_id, ClientCase.user_id == worker_id).first():
+            raise HTTPException(
+                status_code=404, detail=f"Case worker {worker_id} not found"
+            )
+        if (
+            db.query(ClientCase)
+            .filter(ClientCase.client_id == client_id, ClientCase.user_id == worker_id)
+            .first()
+        ):
             raise HTTPException(status_code=400, detail=f"Assignment already exists")
 
         case = ClientCase(
@@ -190,7 +233,7 @@ class ClientMutationService:
             employment_related_financial_supports=False,
             employer_financial_supports=False,
             enhanced_referrals=False,
-            success_rate=0
+            success_rate=0,
         )
         try:
             db.add(case)
@@ -199,7 +242,9 @@ class ClientMutationService:
             return case
         except Exception as e:
             db.rollback()
-            raise HTTPException(status_code=500, detail=f"Failed to create assignment: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Failed to create assignment: {str(e)}"
+            )
 
     # Delete a client and all related case records
     @staticmethod
@@ -213,4 +258,6 @@ class ClientMutationService:
             db.commit()
         except Exception as e:
             db.rollback()
-            raise HTTPException(status_code=500, detail=f"Failed to delete client: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Failed to delete client: {str(e)}"
+            )

@@ -28,6 +28,7 @@ class UserCreate(BaseModel):
             raise ValueError("Role must be either admin or case_worker")
         return v
 
+
 class UserResponse(BaseModel):
     username: str
     email: str
@@ -47,6 +48,7 @@ class SecurityService:
     def get_password_hash(self, password: str) -> str:
         return self.pwd_context.hash(password)
 
+
 security = SecurityService()
 
 
@@ -56,7 +58,9 @@ class TokenService:
     ALGORITHM = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
-    def create_access_token(self, data: dict, expires_delta: Optional[timedelta] = None):
+    def create_access_token(
+        self, data: dict, expires_delta: Optional[timedelta] = None
+    ):
         to_encode = data.copy()
         expire = datetime.utcnow() + (expires_delta or timedelta(minutes=15))
         to_encode.update({"exp": expire})
@@ -68,12 +72,15 @@ class TokenService:
         except JWTError:
             return None
 
+
 token_service = TokenService()
 
 
 # User Service
 class UserService:
-    def authenticate_user(self, db: Session, username: str, password: str) -> Optional[User]:
+    def authenticate_user(
+        self, db: Session, username: str, password: str
+    ) -> Optional[User]:
         user = db.query(User).filter(User.username == username).first()
         if not user or not security.verify_password(password, user.hashed_password):
             return None
@@ -111,11 +118,13 @@ class UserService:
                 detail=str(e),
             )
 
+
 user_service = UserService()
 
 
 # Auth Dependencies
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
+
 
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
@@ -135,6 +144,7 @@ async def get_current_user(
         raise credentials_exception
     return user
 
+
 def get_admin_user(current_user: User = Depends(get_current_user)):
     if current_user.role != UserRole.admin:
         raise HTTPException(
@@ -147,8 +157,7 @@ def get_admin_user(current_user: User = Depends(get_current_user)):
 # Routes
 @router.post("/token")
 async def login_for_access_token(
-    form_data: OAuth2PasswordRequestForm = Depends(),
-    db: Session = Depends(get_db)
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
     user = user_service.authenticate_user(db, form_data.username, form_data.password)
     if not user:

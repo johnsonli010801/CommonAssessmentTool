@@ -191,7 +191,9 @@ async def update_client_services(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    return ClientMutationService.update_client_services(db, client_id, user_id, service_update)
+    return ClientMutationService.update_client_services(
+        db, client_id, user_id, service_update
+    )
 
 
 @router.post("/{client_id}/case-assignment", response_model=ServiceResponse)

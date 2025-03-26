@@ -7,6 +7,7 @@ from app.main import app
 from app.auth.router import get_password_hash
 from app.models import User, UserRole, Client, ClientCase
 
+
 # Create test database
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
 engine = create_engine(
@@ -15,6 +16,7 @@ engine = create_engine(
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+# type: ignore
 @pytest.fixture
 def test_db():
     # Create tables

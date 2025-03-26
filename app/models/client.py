@@ -18,6 +18,7 @@ from app.validators import (
     income_source_constraint,
 )
 
+
 class Client(Base):
     """
     Represents a Client in the database.

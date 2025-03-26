@@ -2,11 +2,15 @@ import pandas as pd
 from app.database import SessionLocal
 from app.models import Client, User, ClientCase
 from app.enums import UserRole
-#from app.auth.router import get_password_hash
+
+# from app.auth.router import get_password_hash
 
 from passlib.context import CryptContext
+
 # Create password context for hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
 # Function to hash passwords
 def get_password_hash(password: str) -> str:
     return pwd_context.hash(password)

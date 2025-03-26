@@ -10,6 +10,7 @@ from sqlalchemy.orm import relationship
 from app.database import Base
 from app.validators import success_rate_constraint
 
+
 class ClientCase(Base):
     """
     Represents the relationship between a client and a case worker.
@@ -34,6 +35,4 @@ class ClientCase(Base):
     user = relationship("User", back_populates="cases")
 
     # Apply constraints
-    __table_args__ = (
-        success_rate_constraint(),
-    )
+    __table_args__ = (success_rate_constraint(),)
