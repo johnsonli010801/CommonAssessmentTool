@@ -1,17 +1,17 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 25.1.0  # Use the latest stable version; check the GitHub releases for the latest version
+    rev: 25.1.0 
     hooks:
       - id: black
-        language_version: python3.12  # Ensure this matches your project's Python version
+        language_version: python3.12 
 
   - repo: https://github.com/PyCQA/flake8
-    rev: '7.1.2'  # Use the latest stable release; check the GitHub releases for the latest version
+    rev: '7.1.2'  
     hooks:
       - id: flake8
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.15.0'  # Use the latest stable release; check the GitHub releases for the latest version
+    rev: 'v1.15.0' 
     hooks:
       - id: mypy
 
