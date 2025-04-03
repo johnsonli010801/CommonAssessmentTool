@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from app.ml.model_registry import ModelRegistry
+import numpy as np
 
 router = APIRouter(
     prefix="/models",
@@ -58,3 +59,38 @@ async def switch_model(model_name: str):
         )
 
     return {"name": model_name}
+
+
+@router.get("/test-prediction", response_model=dict)
+async def test_prediction():
+    """
+    Test endpoint to demonstrate how predictions change when switching models.
+    Returns a prediction using the currently selected model.
+    """
+    try:
+        # Create consistent test data
+        test_features = np.ones((1, 31)) * 0.5  # Use the same test data each time
+
+        # Get the current model from registry
+        registry = ModelRegistry()
+        current_model = registry.get_model()
+        model_name = registry.get_current_model_name()
+
+        # Train the model with some dummy data if it's not trained
+        if not hasattr(current_model, "is_trained") or not current_model.is_trained:
+            # Create dummy training data
+            X_train = np.random.rand(10, 31)
+            y_train = np.random.rand(10)
+            current_model.train(X_train, y_train)
+
+        # Make a prediction
+        prediction = float(current_model.predict(test_features)[0])
+
+        return {"model": model_name, "prediction": prediction, "status": "success"}
+    except Exception as e:
+        # Return error information instead of letting it crash
+        return {
+            "model": registry.get_current_model_name(),
+            "error": str(e),
+            "status": "error",
+        }
