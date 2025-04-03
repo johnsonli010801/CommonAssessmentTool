@@ -10,6 +10,12 @@ jobs:
   test:
     runs-on: ubuntu-latest # Use the latest Ubuntu runner
 
+    services:
+      docker:
+        image: docker:stable-dind
+        options: --privileged
+        ports:
+          - 2375:2375
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4 # Checkout the repository
@@ -25,7 +31,7 @@ jobs:
           pip install setuptools wheel
           pip install -r requirements.txt  # Install dependencies from requirements.txt
           pip install -r requirements-dev.txt
-          pip install pylint pytest
+          pip install pytest
       
       - name: Run Flake8
         run: flake8 .
@@ -39,6 +45,14 @@ jobs:
         run: |
           python -m pytest tests/
 
+      - name: Build Docker Image
+        run: docker build -t my-app-name:latest .
+  
+      - name: Run Docker Container
+        run: |
+            docker run --name my-app-container -d -p 8000:8000 my-app-name:latest
+            # Optionally add commands to check the running container
+  
       - name: Print Success Message
         run: |
           echo "CI Pipeline completed successfully!"
@@ -48,4 +62,5 @@ jobs:
           echo "✓ Dependencies installed"
           echo "✓ Tests executed"
           echo "✓ Linting completed"
+          echo "✓ Docker Image Built"
           echo "========================"
