@@ -82,7 +82,7 @@ class UserService:
         self, db: Session, username: str, password: str
     ) -> Optional[User]:
         user = db.query(User).filter(User.username == username).first()
-        if not user or not security.verify_password(password, user.hashed_password):
+        if not user or not security.verify_password(password, user.hashed_password):  # type: ignore
             return None
         return user
 

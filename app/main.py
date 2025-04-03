@@ -33,8 +33,8 @@ app.include_router(clients_router)
 # Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
-    allow_credentials=True,
+    allow_origins=["*"],  # type: ignore
+    allow_methods=["*"],  # type: ignore
+    allow_headers=["*"],  # type: ignore
+    allow_credentials=True,  # type: ignore
 )
