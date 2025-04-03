@@ -45,6 +45,7 @@ This command tells Docker to prepare and run the application. It may take a few 
 
 ### Run the programming using Docker Run:
 `docker build -t my-app-name . `
+>
 `docker run -p 8000:8000 my-app-name`
 
 
@@ -55,3 +56,22 @@ Once the application is running, open your web browser and visit:
 ### 6. Stopping the Application
 When you are done using the application, you can stop it by going back to your terminal or command prompt, pressing `Ctrl+C`, and then typing:
 `docker-compose down`
+
+## Continuous Integration (CI) Pipeline
+
+Our project utilizes GitHub Actions to automate the testing and deployment processes, ensuring that every change pushed to the repository maintains code quality and stability before deployment.
+
+### CI Workflow Overview
+
+- **Trigger Events**: The CI pipeline is triggered by any push or pull request to the `main` branch, ensuring that all changes are thoroughly tested.
+
+- **Build and Test**: Every change to the repository initiates the following actions:
+  - **Code Checkout**: The latest version of the code is checked out.
+  - **Environment Setup**: The Python environment is set up with the necessary dependencies installed.
+  - **Linting**: The codebase is linted using tools like Flake8 and Black to ensure adherence to coding standards.
+  - **Automated Tests**: Our comprehensive test suite runs via pytest to catch any potential bugs introduced.
+
+### Docker Integration
+
+- **Docker Build**: A Docker image of the application is built to verify that the application can be containerized without issues.
+- **Docker Run**: The Docker container is run to ensure it starts correctly and serves content as expected, particularly from the `/docs` endpoint using a curl command to ensure the Swagger UI is loaded correctly.
