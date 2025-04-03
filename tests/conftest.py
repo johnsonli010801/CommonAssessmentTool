@@ -3,9 +3,10 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.database import Base, get_db
+from app.enums import UserRole
 from app.main import app
-from app.auth.router import get_password_hash
-from app.models import User, UserRole, Client, ClientCase
+from app.models import User, Client, ClientCase
+from app.auth.router import SecurityService
 
 
 # Create test database
@@ -21,14 +22,14 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 def test_db():
     # Create tables
     Base.metadata.create_all(bind=engine)
-
+    security_service = SecurityService()
     db = TestingSessionLocal()
     try:
         # Create test admin user
         admin_user = User(
             username="testadmin",
             email="testadmin@example.com",
-            hashed_password=get_password_hash("testpass123"),
+            hashed_password=security_service.get_password_hash("testpass123"),
             role=UserRole.admin,
         )
         db.add(admin_user)
@@ -37,7 +38,7 @@ def test_db():
         case_worker = User(
             username="testworker",
             email="worker@example.com",
-            hashed_password=get_password_hash("workerpass123"),
+            hashed_password=security_service.get_password_hash("workerpass123"),
             role=UserRole.case_worker,
         )
         db.add(case_worker)
