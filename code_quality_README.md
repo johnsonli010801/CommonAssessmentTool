@@ -152,3 +152,26 @@ You can test the model switching functionality in two ways:
 - **Open for Extension**: New models can be added without modifying existing code
 
 This implementation satisfies all requirements for Story 2 while following SOLID principles.
+
+### predictions
+To demonstrate the effect of model switching on predictions, a test endpoint has been added:
+
+- **Test Prediction Endpoint**:
+  - Path: `GET /models/test-prediction`
+  - Purpose: Shows how predictions change when switching between models
+  - Response: Returns the current model name and its prediction for test data
+
+**How to demonstrate model switching:**
+
+1. Call `GET /models/test-prediction` with the default model
+   - Note the prediction value (e.g., `{"model": "RandomForest", "prediction": 0.45, "status": "success"}`)
+
+2. Switch to a different model using `POST /models/switch/GradientBoosting`
+   - Response confirms the switch: `{"name": "GradientBoosting"}`
+
+3. Call `GET /models/test-prediction` again
+   - Note the different prediction: `{"model": "GradientBoosting", "prediction": 0.72, "status": "success"}`
+
+4. Switch to the third model using `POST /models/switch/LinearRegression`
+   - Call the test endpoint again to see a third different prediction
+
