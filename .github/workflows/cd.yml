@@ -46,6 +46,7 @@ jobs:
             source venv/bin/activate
             pkill uvicorn || true
             nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 > app.log 2>&1 &
+            echo "✅ Deployment completed and API restarted!"
           EOF
       
       - name: Build Docker image
