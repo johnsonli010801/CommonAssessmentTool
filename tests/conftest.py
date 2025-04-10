@@ -3,28 +3,34 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from app.database import Base, get_db
+from app.enums import UserRole
 from app.main import app
-from app.auth.router import get_password_hash
-from app.models import User, UserRole, Client, ClientCase
+from app.models import User, Client, ClientCase
+from app.auth.router import SecurityService
+
 
 # Create test database
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
-engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
+)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
+
+# type: ignore
 @pytest.fixture
 def test_db():
     # Create tables
     Base.metadata.create_all(bind=engine)
-    
+    security_service = SecurityService()
     db = TestingSessionLocal()
     try:
         # Create test admin user
         admin_user = User(
             username="testadmin",
             email="testadmin@example.com",
-            hashed_password=get_password_hash("testpass123"),
-            role=UserRole.admin
+            hashed_password=security_service.get_password_hash("testpass123"),
+            role=UserRole.admin,
         )
         db.add(admin_user)
 
@@ -32,11 +38,11 @@ def test_db():
         case_worker = User(
             username="testworker",
             email="worker@example.com",
-            hashed_password=get_password_hash("workerpass123"),
-            role=UserRole.case_worker
+            hashed_password=security_service.get_password_hash("workerpass123"),
+            role=UserRole.case_worker,
         )
         db.add(case_worker)
-        
+
         # Create test clients
         client1 = Client(
             age=25,
@@ -62,9 +68,9 @@ def test_db():
             currently_employed=False,
             substance_use=False,
             time_unemployed=6,
-            need_mental_health_support_bool=False
+            need_mental_health_support_bool=False,
         )
-        
+
         client2 = Client(
             age=30,
             gender=2,
@@ -89,13 +95,13 @@ def test_db():
             currently_employed=True,
             substance_use=False,
             time_unemployed=0,
-            need_mental_health_support_bool=False
+            need_mental_health_support_bool=False,
         )
-        
+
         db.add(client1)
         db.add(client2)
         db.commit()
-        
+
         # Create test client cases
         client_case1 = ClientCase(
             client_id=1,
@@ -107,9 +113,9 @@ def test_db():
             employment_related_financial_supports=True,
             employer_financial_supports=False,
             enhanced_referrals=True,
-            success_rate=75
+            success_rate=75,
         )
-        
+
         client_case2 = ClientCase(
             client_id=2,
             user_id=2,  # Assigned to case worker
@@ -120,17 +126,18 @@ def test_db():
             employment_related_financial_supports=False,
             employer_financial_supports=True,
             enhanced_referrals=False,
-            success_rate=85
+            success_rate=85,
         )
-        
+
         db.add(client_case1)
         db.add(client_case2)
         db.commit()
-        
+
         yield db
     finally:
         db.close()
         Base.metadata.drop_all(bind=engine)
+
 
 @pytest.fixture
 def client(test_db):
@@ -139,32 +146,33 @@ def client(test_db):
             yield test_db
         finally:
             test_db.close()
-    
+
     app.dependency_overrides[get_db] = override_get_db
     yield TestClient(app)
     app.dependency_overrides.clear()
 
+
 @pytest.fixture
 def admin_token(client):
     response = client.post(
-        "/auth/token",
-        data={"username": "testadmin", "password": "testpass123"}
+        "/auth/token", data={"username": "testadmin", "password": "testpass123"}
     )
     return response.json()["access_token"]
+
 
 @pytest.fixture
 def case_worker_token(client):
     response = client.post(
-        "/auth/token",
-        data={"username": "testworker", "password": "workerpass123"}
+        "/auth/token", data={"username": "testworker", "password": "workerpass123"}
     )
     return response.json()["access_token"]
+
 
 @pytest.fixture
 def admin_headers(admin_token):
     return {"Authorization": f"Bearer {admin_token}"}
 
+
 @pytest.fixture
 def case_worker_headers(case_worker_token):
     return {"Authorization": f"Bearer {case_worker_token}"}
-    
