@@ -33,7 +33,22 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
 
+      - name: Deploy to EC2
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+            cd ~/CommonAssessmentTool
+            git pull origin main
+            source venv/bin/activate
+            pkill uvicorn || true
+            nohup uvicorn app.main:app --host 0.0.0.0 --port 8000 > app.log 2>&1 &
+            echo "✅ Deployment completed and API restarted!"
+          EOF
+      
       - name: Build Docker image
         run: docker build -t common-assessment-tool .
 
